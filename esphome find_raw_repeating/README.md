@@ -24,15 +24,7 @@ remove the logg messages from the text untill you have this
 
 this is what you use in esphome Remote Receiver
 
-remote_receiver:
-  pin: 3
-  tolerance: 60%
-  filter: 100us ##decrease this is you have pulses less then 100us
-  idle: 2ms   ##set this to a value less then idle pulse 2289
+remember to set the idle: to a value less then idle pulse 2289 like 2ms, tolerance: 60% and filter: 100us should work ok
 
-  
-binary_sensor:     
-  - platform: remote_receiver
-    name: "test1"
-    raw:
-      code: [411, -1130, 1184,-367, 404, -1137, 1184, -372, 1179, -379, 1170, -378, 1169, -394, 383, -1152, 395, -1151, 392, -1142, 1175, -391, 1154, -409, 364, -1156, 390, -1166, 384, -1159, 1156, -403, 376, -1162, 1158, -396,1153, -403, 1151, -412, 367, -1170, 379, -1164, 379, -1162, 383, -1161]     
+
+ 
