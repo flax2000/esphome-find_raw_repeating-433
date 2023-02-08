@@ -1,0 +1,66 @@
+esphome:
+  name: raw-repeating-433
+  includes:
+    - 433_rx.h
+  platformio_options:
+   board_build.f_cpu: 160000000L
+
+esp8266:
+  board: esp01_1m
+  
+wifi:
+  ssid: "xxxx"
+  password: "xxxxx"
+  fast_connect: true 
+
+
+
+logger:
+  level: DEBUG
+  baud_rate: 0
+
+
+api:
+
+ota:
+
+
+custom_component:
+- lambda: |-
+    RX433_PIN =3;//set rx pin here <--------------------------------------------------|
+    auto my_custom = new MyCustomComponent();
+    return {my_custom};
+  components:
+  - id: my_custom_id
+
+
+
+number:
+  - platform: template
+    name: "nSeparationLimit"
+    optimistic: true
+    min_value: 100
+    max_value: 20000
+    step: 50
+    initial_value: 2000 
+    mode: slider
+    set_action:
+      then:
+        - lambda: |-  
+            nSeparationLimit=x;
+
+
+  - platform: template
+    name: "tolerance"
+    optimistic: true
+    min_value: 0
+    max_value: 150
+    step: 1
+    initial_value: 90 
+    mode: slider
+    set_action:
+      then:
+        - lambda: |-  
+            tolerance=x;
+
+
