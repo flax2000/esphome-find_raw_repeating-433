@@ -1,7 +1,7 @@
 # esphome-find_raw_repeating-433
 This is a easier way to find raw repeating codes in esphome without the log getting flooded with all the 433mhz noice
 
-Just set the rx pin and board type in raw_repeating_433.yaml and upload the code, you will get 2 sliders in homeassistant, nSeparationLimit(idle) and tolerance (tolerance here are a number not % as in esphome Remote Receiver)
+Just set the RX433_PIN and board type in raw_repeating_433.yaml and upload the code, you will get 2 sliders in homeassistant, nSeparationLimit(idle) and tolerance (tolerance here are a number not % as in esphome Remote Receiver)
 
 change the nSeparationLimit and mayby the tolerance if necessary untill you recieve the signal:
 
