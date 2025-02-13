@@ -14,3 +14,6 @@ remove the logg messages from the text untill you have this
 this is what you use in esphome Remote Receiver
 
 remember to set the idle: to a value less then idle pulse 2289 like 2ms, tolerance: 60% and filter: 100us should work ok
+
+Update 2025
+i just added a capture all switch that lets you capture the next 1000 timings and print to the log.
