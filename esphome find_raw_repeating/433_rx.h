@@ -3,6 +3,8 @@
 //made by swedude
 
 #pragma once
+
+
 #if defined(ESP8266)
 // interrupt handler and related code must be in RAM on ESP8266,
 // according to issue #46.
@@ -15,8 +17,9 @@
 #define RECEIVE_ATTR
 #define VAR_ISR_ATTR
 #endif
-
-int RX433_PIN = 3;
+volatile VAR_ISR_ATTR int8_t capture433 = 0;
+volatile VAR_ISR_ATTR int8_t capture433_repeating = 0;
+int RX433_PIN = 0;
 volatile VAR_ISR_ATTR int16_t nSeparationLimit = 2000;
 volatile VAR_ISR_ATTR int16_t tolerance = 90;
 volatile VAR_ISR_ATTR int16_t nSeparation_pulse_state;
@@ -93,7 +96,41 @@ void RECEIVE_ATTR raw_data(uint16_t duration) {
 }
 
 
+#define RAW_CAPTURE_MAX_CHANGES 1000
+//--------------------------------------------------------------raw repeating find-- rc switch part of code from https://github.com/sui77/rc-switch------------------------------------------------------------------------------------------------
 
+int32_t timings_raw_capture[RAW_CAPTURE_MAX_CHANGES];
+boolean raw_capture_done=0;
+
+void RECEIVE_ATTR raw_data_capture(uint16_t duration) {
+
+
+  static uint16_t counter = 0;
+  
+  
+  if(raw_capture_done==0&&capture433==1)
+  {
+	if(counter<RAW_CAPTURE_MAX_CHANGES)
+	{		
+	 timings_raw_capture[counter]=duration; 
+	 counter++;
+	}
+else
+{
+counter=0;	
+capture433=0;	
+raw_capture_done=1;	
+	
+}	
+	
+  }
+  
+  
+  
+  
+  
+
+}
 
 
 
@@ -104,8 +141,8 @@ void RECEIVE_ATTR ext_int_1() {
   static unsigned long edgeTimeStamp = 0;  // Timestamp of edge
   uint16_t duration = micros() - edgeTimeStamp;
   edgeTimeStamp = micros();
-  raw_data(duration);
-
+  if(capture433_repeating)raw_data(duration);
+  raw_data_capture(duration);
 }
 
 
@@ -197,6 +234,66 @@ class MyCustomComponent  : public PollingComponent {
         ESP_LOGD("", "");
         raw_lenght_done = 0;
       }
+
+
+
+
+
+
+      if (raw_capture_done == 1)
+      {
+        //below modefied code from esphome raw_protocol.cpp
+        static const char *const TAG = "diy raw capture";
+        char buffer[256];
+        uint32_t buffer_offset = 0;
+        buffer_offset += sprintf(buffer, "size: %i  ", (RAW_CAPTURE_MAX_CHANGES - 1));
+        for (int32_t i = 0; i < RAW_CAPTURE_MAX_CHANGES - 1; i++)
+        {
+          const int32_t value = timings_raw_capture[i + 1]; //-->> dont write the idle pulse here
+          const uint32_t remaining_length = sizeof(buffer) - buffer_offset;
+          int written;
+
+            if (i + 1 < RAW_CAPTURE_MAX_CHANGES - 1) {
+              written = snprintf(buffer + buffer_offset, remaining_length, "%d,", value);
+            } else {
+              written = snprintf(buffer + buffer_offset, remaining_length, "%d", value);
+            }
+
+            if (written < 0 || written >= int(remaining_length)) {
+              // write failed, flush...
+              buffer[buffer_offset] = '\0';
+              ESP_LOGD(TAG, "%s", buffer);
+              buffer_offset = 0;
+              written = sprintf(buffer, "  ");
+              if (i + 1 < RAW_CAPTURE_MAX_CHANGES) {
+                written += sprintf(buffer + written, "%d,", value);
+              } else {
+                written += sprintf(buffer + written, "%d", value);
+              }
+            }
+          
+
+
+          buffer_offset += written;
+        }
+        if (buffer_offset != 0) {
+          ESP_LOGD(TAG, "%s", buffer);
+        }
+
+        ESP_LOGD(TAG, "signal done ");
+        ESP_LOGD("", "");
+        raw_capture_done = 0;
+      }
+
+
+
+
+
+
+
+
+
+
 
     }
 };

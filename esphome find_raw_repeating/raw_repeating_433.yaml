@@ -9,10 +9,9 @@ esp8266:
   board: esp01_1m
   
 wifi:
-  ssid: "xxxx"
-  password: "xxxxx"
+  ssid: "---"
+  password: "---"
   fast_connect: true 
-
 
 
 logger:
@@ -23,15 +22,31 @@ logger:
 api:
 
 ota:
+  - platform: esphome
 
 
-custom_component:
-- lambda: |-
-    RX433_PIN =3;//set rx pin here <--------------------------------------------------|
-    auto my_custom = new MyCustomComponent();
-    return {my_custom};
-  components:
-  - id: my_custom_id
+switch:
+  - platform: template
+    name: "find raw repeating"
+    turn_on_action:
+      then:
+        - lambda: |-  
+            capture433_repeating=1;
+    turn_off_action:
+      then:
+        - lambda: |-  
+            capture433_repeating=0;
+
+  - platform: template
+    name: "capture all"
+    turn_on_action:
+      then:
+        - lambda: |-  
+            capture433=1;
+    turn_off_action:
+      then:
+        - lambda: |-  
+            capture433=0;
 
 
 
@@ -64,3 +79,17 @@ number:
             tolerance=x;
 
 
+
+
+
+custom_component:
+- lambda: |-
+    RX433_PIN =3;//set rx pin
+    auto my_custom = new MyCustomComponent();
+    return {my_custom};
+  components:
+  - id: my_custom_id
+
+
+
+  
